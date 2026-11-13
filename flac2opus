@@ -1,0 +1,16 @@
+#!/bin/sh
+dir=${1:-.}
+bitrate=192
+
+find "$dir" -type f -name '*.flac' -print | \
+    while IFS= read -r f; do
+        out=${f%.flac}.opus
+        if opusenc --music --bitrate "$bitrate" "$f" "$out" 2>/dev/null \
+                && opusinfo -q -q "$out" >/dev/null 2>&1; then
+            printf "Converted %s to %s\n" "$f" "$out"
+            rm -fv "$f"
+        else
+            printf 'Failed conversion of %s\n' "$f" >&2
+            rm -fv "$out"
+        fi
+    done
